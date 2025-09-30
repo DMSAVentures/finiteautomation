@@ -1,8 +1,9 @@
-package main
+package modthree
 
 import (
-	"finiteautomation/internal"
 	"fmt"
+
+	"github.com/dmsaventures/finiteautomation"
 )
 
 // ModState represents the states for modulo-3 computation
@@ -24,12 +25,12 @@ const (
 
 // ModThreeGeneric uses the generic FSM for modulo-3 computation
 type ModThreeGeneric struct {
-	fsm *internal.FSM[ModState, BinarySymbol]
+	fsm *finiteautomation.FSM[ModState, BinarySymbol]
 }
 
 // NewModThreeGeneric creates a new modulo-3 FSM using generics
 func NewModThreeGeneric() *ModThreeGeneric {
-	config := internal.FSMConfig[ModState, BinarySymbol]{
+	config := finiteautomation.FSMConfig[ModState, BinarySymbol]{
 		States:       []ModState{ModState0, ModState1, ModState2},
 		Alphabet:     []BinarySymbol{Binary0, Binary1},
 		InitialState: ModState0,
@@ -50,7 +51,7 @@ func NewModThreeGeneric() *ModThreeGeneric {
 		},
 	}
 
-	fsm, err := internal.NewFSM(config)
+	fsm, err := finiteautomation.NewFSM(config)
 	if err != nil {
 		// This shouldn't happen with our hardcoded config, but handle it anyway
 		panic(fmt.Sprintf("Invalid ModThree FSM config: %v", err))

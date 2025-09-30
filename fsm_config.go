@@ -1,4 +1,4 @@
-package internal
+package finiteautomation
 
 type State comparable
 type Input comparable

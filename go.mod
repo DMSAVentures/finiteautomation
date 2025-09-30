@@ -1,3 +1,3 @@
-module finiteautomation
+module github.com/dmsaventures/finiteautomation
 
-go 1.24
+go 1.22
