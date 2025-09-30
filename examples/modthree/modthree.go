@@ -30,23 +30,29 @@ type ModThreeGeneric struct {
 
 // NewModThreeGeneric creates a new modulo-3 FSM using generics
 func NewModThreeGeneric() *ModThreeGeneric {
+	// Based on the formal definition:
+	// Q = (S0, S1, S2)
+	// Σ = (0, 1)
+	// q0 = S0
+	// F = (S0, S1, S2)
+	// δ(S0,0) = S0; δ(S0,1) = S1; δ(S1,0) = S2; δ(S1,1) = S0; δ(S2,0) = S1; δ(S2,1) = S2
 	config := finiteautomation.FSMConfig[ModState, BinarySymbol]{
-		States:       []ModState{ModState0, ModState1, ModState2},
-		Alphabet:     []BinarySymbol{Binary0, Binary1},
-		InitialState: ModState0,
-		FinalStates:  []ModState{ModState0},
-		Transitions: map[ModState]map[BinarySymbol]ModState{
+		States:       []ModState{ModState0, ModState1, ModState2}, // Q
+		Alphabet:     []BinarySymbol{Binary0, Binary1},             // Σ
+		InitialState: ModState0,                                    // q0
+		FinalStates:  []ModState{ModState0, ModState1, ModState2},  // F - all states are accepting
+		Transitions: map[ModState]map[BinarySymbol]ModState{       // δ
 			ModState0: {
-				Binary0: ModState0, // (0*2 + 0) mod 3 = 0
-				Binary1: ModState1, // (0*2 + 1) mod 3 = 1
+				Binary0: ModState0, // δ(S0,0) = S0
+				Binary1: ModState1, // δ(S0,1) = S1
 			},
 			ModState1: {
-				Binary0: ModState2, // (1*2 + 0) mod 3 = 2
-				Binary1: ModState0, // (1*2 + 1) mod 3 = 0
+				Binary0: ModState2, // δ(S1,0) = S2
+				Binary1: ModState0, // δ(S1,1) = S0
 			},
 			ModState2: {
-				Binary0: ModState1, // (2*2 + 0) mod 3 = 1
-				Binary1: ModState2, // (2*2 + 1) mod 3 = 2
+				Binary0: ModState1, // δ(S2,0) = S1
+				Binary1: ModState2, // δ(S2,1) = S2
 			},
 		},
 	}
@@ -79,21 +85,30 @@ func (m *ModThreeGeneric) ParseInput(binaryStr string) ([]BinarySymbol, error) {
 	return inputs, nil
 }
 
-// IsDivisibleByThree checks if a binary number is divisible by 3
-func (m *ModThreeGeneric) IsDivisibleByThree(binaryStr string) bool {
+// ComputeModThree computes the modulo-3 remainder of a binary number
+// Returns the remainder (0, 1, or 2) and whether the computation was successful
+func (m *ModThreeGeneric) ComputeModThree(binaryStr string) (int, bool) {
 	inputs, err := m.ParseInput(binaryStr)
 	if err != nil {
-		return false
+		return 0, false
 	}
 	if inputs == nil {
-		// Empty string or "0" is considered divisible by 3
-		return true
+		// Empty string or "0" has remainder 0
+		return 0, true
 	}
 
 	err = m.fsm.Execute(inputs)
 	if err != nil {
-		return false
+		return 0, false
 	}
 
-	return true
+	// Return the current state which represents the remainder
+	return int(m.fsm.CurrentState()), true
+}
+
+// IsDivisibleByThree checks if a binary number is divisible by 3
+// A number is divisible by 3 if its remainder is 0 (i.e., final state is S0)
+func (m *ModThreeGeneric) IsDivisibleByThree(binaryStr string) bool {
+	remainder, ok := m.ComputeModThree(binaryStr)
+	return ok && remainder == 0
 }
